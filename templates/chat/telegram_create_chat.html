@@ -3,45 +3,94 @@
 {% block title %}Yangi Chat Yaratish - Live Chat{% endblock %}
 
 {% block content %}
-<div style="display: flex; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(135deg, #1877f2 0%, #42b0ff 100%);">
-    <div style="background: #ffffff; padding: 40px; border-radius: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15); width: 500px; max-width: 90vw;">
-        <div style="text-align: center; margin-bottom: 32px;">
-            <div style="font-size: 48px; margin-bottom: 16px;">➕</div>
-            <h1 style="color: #1c1e21; font-size: 24px; font-weight: 700; margin-bottom: 8px;">Yangi Chat Yaratish</h1>
-            <p style="color: #8a8d91; font-size: 16px;">Chat xonasi yaratib, do'stlaringiz bilan muloqot qiling</p>
+<style>
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .create-card {
+        animation: slideIn 0.5s ease;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    
+    .icon-pulse {
+        animation: pulse 2s ease-in-out infinite;
+    }
+</style>
+
+<div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 1rem;">
+    <div class="create-card" style="background: #ffffff; padding: 32px 28px; border-radius: 20px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255,255,255,0.1); width: 480px; max-width: 90vw;">
+        <div style="text-align: center; margin-bottom: 28px;">
+            <div class="icon-pulse" style="
+                width: 70px;
+                height: 70px;
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+                border-radius: 50%;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2rem;
+                margin-bottom: 14px;
+                box-shadow: 0 12px 32px rgba(79, 172, 254, 0.4);
+            ">💬</div>
+            <h1 style="color: #1c1e21; font-size: 20px; font-weight: 700; margin-bottom: 8px; background: linear-gradient(135deg, #4facfe, #00f2fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Yangi Chat Yaratish</h1>
+            <p style="color: #8a8d91; font-size: 13px; line-height: 1.4;">Chat xonasi yaratib, real-time<br>muloqot qiling</p>
         </div>
 
         <form method="post">
             {% csrf_token %}
             <div style="margin-bottom: 20px;">
-                <label style="display: block; color: #1c1e21; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
-                    Chat Nomi *
+                <label style="display: block; color: #1c1e21; font-size: 13px; font-weight: 700; margin-bottom: 8px;">
+                    <span style="display: inline-flex; align-items: center; gap: 6px;">
+                        📝 Chat Nomi
+                        <span style="color: #ff4757; font-size: 16px;">*</span>
+                    </span>
                 </label>
                 <input type="text" 
                        name="room_name" 
-                       placeholder="Masalan: Do'stlar Guruhi" 
+                       placeholder="Masalan: Do'stlar Guruhi, Ish Jamoasi..." 
                        required
-                       style="width: 100%; padding: 16px; background: #f5f7fa; border: 2px solid #dfe1e6; border-radius: 12px; color: #1c1e21; font-size: 15px; transition: all 0.15s ease;"
-                       onfocus="this.style.borderColor='#1877f2'; this.style.background='#ffffff'"
-                       onblur="this.style.borderColor='#dfe1e6'; this.style.background='#f5f7fa'">
+                       style="width: 100%; padding: 14px 16px; background: #f8f9fa; border: 2px solid #e8ecf1; border-radius: 10px; color: #1c1e21; font-size: 14px; transition: all 0.3s ease;"
+                       onfocus="this.style.borderColor='#4facfe'; this.style.background='#ffffff'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(79,172,254,0.15)'"
+                       onblur="this.style.borderColor='#e8ecf1'; this.style.background='#f8f9fa'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                <p style="margin-top: 6px; color: #7f8c8d; font-size: 11px; display: flex; align-items: center; gap: 5px;">
+                    💡 Eslatma: Chat nomi kamida 3 ta belgidan iborat bo'lishi kerak
+                </p>
             </div>
 
-            <div style="display: flex; gap: 12px;">
+            <div style="display: flex; gap: 10px; margin-top: 24px;">
                 <a href="{% url 'chat:index' %}" 
-                   style="flex: 1; padding: 16px; background: #e8eaed; color: #1c1e21; text-align: center; border-radius: 12px; text-decoration: none; font-size: 16px; font-weight: 600; transition: all 0.15s ease;"
-                   onmouseover="this.style.background='#dadde1'"
-                   onmouseout="this.style.background='#e8eaed'">
-                    Bekor qilish
+                   style="flex: 1; padding: 12px; background: #f1f3f5; color: #495057; text-align: center; border-radius: 10px; text-decoration: none; font-size: 14px; font-weight: 600; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 6px;"
+                   onmouseover="this.style.background='#e9ecef'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'"
+                   onmouseout="this.style.background='#f1f3f5'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                    ← Bekor qilish
                 </a>
                 
                 <button type="submit" 
-                        style="flex: 2; padding: 16px; background: #1877f2; border: none; border-radius: 12px; color: #ffffff; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.15s ease;"
-                        onmouseover="this.style.background='#166fe5'; this.style.transform='scale(1.02)'"
-                        onmouseout="this.style.background='#1877f2'; this.style.transform='scale(1)'">
-                    Chat Yaratish
+                        style="flex: 2; padding: 12px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border: none; border-radius: 10px; color: #ffffff; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 6px 16px rgba(79, 172, 254, 0.3);"
+                        onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 10px 24px rgba(79,172,254,0.4)'"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 6px 16px rgba(79,172,254,0.3)'">
+                    ✨ Chat Yaratish
                 </button>
             </div>
         </form>
+        
+        <div style="margin-top: 18px; padding: 12px; background: linear-gradient(135deg, rgba(79,172,254,0.05), rgba(0,242,254,0.05)); border-radius: 10px; border-left: 3px solid #4facfe;">
+            <p style="margin: 0; color: #6c757d; font-size: 12px; line-height: 1.5;">
+                <strong style="color: #4facfe;">🎯 Maslahat:</strong> Aniq va tushunarli nom tanlang. Bu sizga chatni oson topishga yordam beradi.
+            </p>
+        </div>
     </div>
 </div>
 {% endblock %}

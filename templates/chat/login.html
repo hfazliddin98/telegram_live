@@ -3,131 +3,168 @@
 {% block title %}Kirish - Live Chat{% endblock %}
 
 {% block content %}
+<style>
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+    
+    @keyframes gradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    
+    .login-container {
+        background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
+        background-size: 400% 400%;
+        animation: gradient 15s ease infinite;
+    }
+    
+    .login-card {
+        backdrop-filter: blur(16px);
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .logo-icon {
+        animation: float 3s ease-in-out infinite;
+    }
+</style>
+
 <div class="login-container" style="
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     padding: 1rem;
+    position: relative;
+    overflow: hidden;
 ">
+    <!-- Decorative circles -->
+    <div style="position: absolute; width: 300px; height: 300px; background: rgba(255,255,255,0.1); border-radius: 50%; top: -150px; left: -150px; backdrop-filter: blur(5px);"></div>
+    <div style="position: absolute; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; bottom: -100px; right: -100px; backdrop-filter: blur(5px);"></div>
+    
     <div class="login-card" style="
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.1);
         padding: 3rem 2.5rem;
         width: 100%;
-        max-width: 400px;
+        max-width: 420px;
         text-align: center;
+        position: relative;
+        z-index: 1;
     ">
         <!-- Logo/Icon -->
-        <div style="margin-bottom: 2rem;">
-            <div style="
-                width: 80px;
-                height: 80px;
-                background: linear-gradient(135deg, #667eea, #764ba2);
+        <div style="margin-bottom: 1.5rem;">
+            <div class="logo-icon" style="
+                width: 70px;
+                height: 70px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 margin: 0 auto 1rem;
                 font-size: 2rem;
-            ">�</div>
+                box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+            ">💬</div>
             <h1 style="
-                font-size: 1.8rem;
-                font-weight: 600;
-                color: #2c3e50;
-                margin: 0 0 0.5rem 0;
+                font-size: 1.5rem;
+                font-weight: 700;
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                margin: 0 0 0.4rem 0;
             ">Live Chat</h1>
             <p style="
                 color: #7f8c8d;
-                font-size: 0.95rem;
+                font-size: 0.85rem;
                 margin: 0;
-            ">Hisobingizga kiring</p>
+            ">Hisobingizga xush kelibsiz</p>
         </div>
 
         <!-- Login Form -->
         <form method="post" style="text-align: left;">
             {% csrf_token %}
             
-            <div style="margin-bottom: 1.5rem;">
+            <div style="margin-bottom: 1.2rem;">
                 <label for="username" style="
                     display: block;
-                    color: #34495e;
-                    font-weight: 500;
-                    margin-bottom: 0.5rem;
-                    font-size: 0.9rem;
+                    color: #2c3e50;
+                    font-weight: 600;
+                    margin-bottom: 0.4rem;
+                    font-size: 0.85rem;
                 ">Foydalanuvchi nomi</label>
-                <input type="text" 
-                       id="username" 
-                       name="username" 
-                       required 
-                       placeholder="Username kiriting"
-                       style="
-                           width: 100%;
-                           padding: 0.875rem 1rem;
-                           border: 2px solid #ecf0f1;
-                           border-radius: 8px;
-                           font-size: 1rem;
-                           transition: all 0.3s ease;
-                           background: #f8f9fa;
-                       "
-                       onfocus="this.style.borderColor='#667eea'; this.style.background='#fff'"
-                       onblur="this.style.borderColor='#ecf0f1'; this.style.background='#f8f9fa'">
+                <div style="position: relative;">
+                    <input type="text" 
+                           id="username" 
+                           name="username" 
+                           required 
+                           placeholder="Username kiriting"
+                           style="
+                               width: 100%;
+                               padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+                               border: 2px solid #e8ecf1;
+                               border-radius: 10px;
+                               font-size: 0.9rem;
+                               transition: all 0.3s ease;
+                               background: #f8f9fa;
+                           "
+                           onfocus="this.style.borderColor='#667eea'; this.style.background='#fff'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102,126,234,0.15)'"
+                           onblur="this.style.borderColor='#e8ecf1'; this.style.background='#f8f9fa'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                    <span style="position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); font-size: 1.1rem;">👤</span>
+                </div>
             </div>
 
-            <div style="margin-bottom: 2rem;">
+            <div style="margin-bottom: 1.5rem;">
                 <label for="password" style="
                     display: block;
-                    color: #34495e;
-                    font-weight: 500;
-                    margin-bottom: 0.5rem;
-                    font-size: 0.9rem;
+                    color: #2c3e50;
+                    font-weight: 600;
+                    margin-bottom: 0.4rem;
+                    font-size: 0.85rem;
                 ">Parol</label>
-                <input type="password" 
-                       id="password" 
-                       name="password" 
-                       required 
-                       placeholder="Parolingizni kiriting"
-                       style="
-                           width: 100%;
-                           padding: 0.875rem 1rem;
-                           border: 2px solid #ecf0f1;
-                           border-radius: 8px;
-                           font-size: 1rem;
-                           transition: all 0.3s ease;
-                           background: #f8f9fa;
-                       "
-                       onfocus="this.style.borderColor='#667eea'; this.style.background='#fff'"
-                       onblur="this.style.borderColor='#ecf0f1'; this.style.background='#f8f9fa'">
+                <div style="position: relative;">
+                    <input type="password" 
+                           id="password" 
+                           name="password" 
+                           required 
+                           placeholder="Parolingizni kiriting"
+                           style="
+                               width: 100%;
+                               padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+                               border: 2px solid #e8ecf1;
+                               border-radius: 10px;
+                               font-size: 0.9rem;
+                               transition: all 0.3s ease;
+                               background: #f8f9fa;
+                           "
+                           onfocus="this.style.borderColor='#667eea'; this.style.background='#fff'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102,126,234,0.15)'"
+                           onblur="this.style.borderColor='#e8ecf1'; this.style.background='#f8f9fa'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                    <span style="position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); font-size: 1.1rem;">🔒</span>
+                </div>
             </div>
 
             <button type="submit" style="
                 width: 100%;
-                background: linear-gradient(135deg, #667eea, #764ba2);
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 color: white;
                 border: none;
-                padding: 0.875rem 1rem;
-                border-radius: 8px;
-                font-weight: 500;
-                font-size: 1rem;
+                padding: 0.85rem;
+                border-radius: 10px;
+                font-weight: 600;
+                font-size: 0.95rem;
                 cursor: pointer;
                 transition: all 0.3s ease;
-                margin-bottom: 1.5rem;
+                margin-bottom: 1.2rem;
+                box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
             " 
-            onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 8px 25px rgba(102,126,234,0.3)'"
-            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                Kirish
+            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 24px rgba(102,126,234,0.4)'"
+            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 6px 16px rgba(102,126,234,0.3)'">
+                🚀 Kirish
             </button>
-
-            <div style="text-align: center;">
-                <p style="
-                    color: #95a5a6;
-                    font-size: 0.85rem;
-                    line-height: 1.4;
-                    margin: 0;
-                ">Admin tomonidan yaratilgan<br>hisobingiz bilan kiring</p>
-            </div>
         </form>
     </div>
 </div>
@@ -136,14 +173,12 @@
 // Cache busting
 window.addEventListener('load', function() {
     if (performance.navigation.type == 1) {
-        // Sahifa reload qilindi
         window.location.href = window.location.href + '?t=' + Date.now();
     }
 });
 
 // Form submission cache prevention  
 document.querySelector('form').addEventListener('submit', function() {
-    // Form submit qilingandan keyin cache'ni tozalash
     if ('caches' in window) {
         caches.keys().then(function(names) {
             names.forEach(function(name) {

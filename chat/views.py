@@ -16,6 +16,7 @@ def index(request):
     
     context = {
         'rooms': rooms,
+        'all_rooms': rooms,  # Sidebar uchun
         'user_count': user_count,
         'message_count': message_count,
     }
@@ -72,14 +73,13 @@ def room(request, room_id):
         edit_message_id = request.POST.get('edit_message_id')
         if edit_message_id:
             message = get_object_or_404(Message, id=edit_message_id, room=room)
-            # Faqat xabar egasi yoki admin tahrirlashi mumkin
-            if request.user == message.user or request.user == room.created_by:
-                edited_content = request.POST.get('edited_content', '')
-                # Strip faqat boshi va oxiridan, line breaks ichida saqlanadi
-                edited_content = edited_content.strip()
-                if edited_content:
-                    message.content = edited_content
-                    message.save()
+            # Har qanday user tahrirlashi mumkin
+            edited_content = request.POST.get('edited_content', '')
+            # Strip faqat boshi va oxiridan, line breaks ichida saqlanadi
+            edited_content = edited_content.strip()
+            if edited_content:
+                message.content = edited_content
+                message.save()
             return redirect('chat:room', room_id=room_id)
         
         # Yangi xabar yaratish
@@ -120,9 +120,13 @@ def room(request, room_id):
             )
             return redirect('chat:room', room_id=room_id)
     
+    # Barcha xonalarni sidebar uchun olish
+    all_rooms = Room.objects.all().order_by('-created_at')
+    
     context = {
         'room': room,
         'messages': messages_list,
+        'all_rooms': all_rooms,
     }
     return render(request, "chat/telegram_room.html", context)
 
@@ -228,37 +232,36 @@ def delete_message_content(request, message_id, content_type):
     if request.method == 'POST':
         try:
             message = get_object_or_404(Message, id=message_id)
-            # Faqat xabar egasi yoki xona admini o'chira oladi
-            if message.user == request.user or message.room.created_by == request.user:
-                room_id = message.room.id
+            # Har qanday user o'chira oladi
+            room_id = message.room.id
+            
+            if content_type == 'text':
+                # Faqat matnni o'chirish
+                message.content = ""
+                message.save()
                 
-                if content_type == 'text':
-                    # Faqat matnni o'chirish
-                    message.content = ""
+            elif content_type == 'file':
+                # Faqat faylni o'chirish
+                if message.file:
+                    try:
+                        message.file.delete()
+                    except:
+                        pass
+                    message.file = None
+                    message.file_size = 0
+                    message.file_type = None
                     message.save()
-                    
-                elif content_type == 'file':
-                    # Faqat faylni o'chirish
-                    if message.file:
-                        try:
-                            message.file.delete()
-                        except:
-                            pass
-                        message.file = None
-                        message.file_size = 0
-                        message.file_type = None
-                        message.save()
-                    
-                elif content_type == 'all':
-                    # Butun xabarni o'chirish
-                    if message.file:
-                        try:
-                            message.file.delete()
-                        except:
-                            pass
-                    message.delete()
                 
-                return redirect('chat:room', room_id=room_id)
+            elif content_type == 'all':
+                # Butun xabarni o'chirish
+                if message.file:
+                    try:
+                        message.file.delete()
+                    except:
+                        pass
+                message.delete()
+            
+            return redirect('chat:room', room_id=room_id)
         except:
             pass
     
