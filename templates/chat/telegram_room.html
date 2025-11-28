@@ -5,40 +5,325 @@
 
 {% block content %}
 <style>
+    /* Custom Prompt Dialog */
+    .custom-prompt-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        z-index: 10000;
+        animation: fadeIn 0.2s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    .custom-prompt-dialog {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        border-radius: 16px;
+        padding: 0;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.3s ease;
+        z-index: 10001;
+    }
+    
+    @keyframes slideUp {
+        from {
+            transform: translate(-50%, -40%);
+            opacity: 0;
+        }
+        to {
+            transform: translate(-50%, -50%);
+            opacity: 1;
+        }
+    }
+    
+    .custom-prompt-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #e8e8e8;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .custom-prompt-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #1c1e21;
+        flex: 1;
+    }
+    
+    .custom-prompt-body {
+        padding: 24px;
+    }
+    
+    .custom-prompt-body textarea {
+        width: 100%;
+        box-sizing: border-box;
+        min-height: 120px;
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 15px;
+        font-family: inherit;
+        line-height: 1.5;
+        resize: vertical;
+        transition: border-color 0.2s;
+        background: white;
+    }
+    
+    .custom-prompt-body textarea:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+    
+    .custom-prompt-footer {
+        padding: 16px 24px;
+        border-top: 1px solid #e8e8e8;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+    
+    .custom-prompt-btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .custom-prompt-btn-cancel {
+        background: #f0f2f5;
+        color: #1c1e21;
+    }
+    
+    .custom-prompt-btn-cancel:hover {
+        background: #e4e6eb;
+    }
+    
+    .custom-prompt-btn-ok {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        min-width: 80px;
+    }
+    
+    .custom-prompt-btn-ok:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
     .message-bubble {
         max-width: 70%;
         padding: 12px 16px;
         position: relative;
         word-wrap: break-word;
         display: block;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
     }
     
     .message-own {
-        background: #2563eb;
+        background: #1877f2;
+        color: #ffffff;
         border-radius: 18px 18px 6px 18px;
         margin-left: auto;
         margin-right: 0;
     }
     
     .message-other {
-        background: #2f2f2f;
+        background: #e8eaed;
+        color: #1c1e21;
         border-radius: 18px 18px 18px 6px;
         margin-left: 0;
         margin-right: auto;
     }
     
-    .delete-btn {
+    .message-content {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        line-height: 1.5;
+        font-size: 15px;
+    }
+    
+    /* Message action buttons */
+    .message-actions {
         position: absolute;
         top: -12px;
         right: -12px;
-        opacity: 0;
-        transition: opacity 0.2s ease;
         display: flex;
-        gap: 4px;
+        gap: 6px;
+        opacity: 0.7; /* Test uchun doimo ko'rinadi */
+        transition: all 0.2s ease;
+        z-index: 10;
     }
     
-    .message-bubble:hover .delete-btn {
+    .message-bubble:hover .message-actions {
         opacity: 1;
+    }
+    
+    .action-icon-btn {
+        background: white;
+        border: 1px solid rgba(0,0,0,0.1);
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        padding: 0;
+    }
+    
+    .action-icon-btn svg {
+        width: 16px;
+        height: 16px;
+        fill: currentColor;
+    }
+    
+    .action-icon-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+    
+    .copy-action {
+        color: #667eea;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    }
+    
+    .copy-action:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-color: #667eea;
+    }
+    
+    .edit-action {
+        color: #f093fb;
+        background: linear-gradient(135deg, rgba(240, 147, 251, 0.1), rgba(245, 87, 108, 0.1));
+    }
+    
+    .edit-action:hover {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border-color: #f093fb;
+    }
+    
+    .download-action {
+        color: #4facfe;
+        background: linear-gradient(135deg, rgba(79, 172, 254, 0.1), rgba(0, 242, 254, 0.1));
+    }
+    
+    .download-action:hover {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        border-color: #4facfe;
+    }
+    
+    .delete-action {
+        color: #ff4757;
+        background: linear-gradient(135deg, rgba(255, 71, 87, 0.1), rgba(255, 99, 72, 0.1));
+    }
+    
+    .delete-action:hover {
+        background: linear-gradient(135deg, #ff4757 0%, #ff6348 100%);
+        color: white;
+        border-color: #ff4757;
+    }
+    
+    /* Always show copy button on touch devices */
+    @media (hover: none) {
+        .copy-btn {
+            opacity: 0.7;
+        }
+    }
+    
+    /* Toast notification for copy */
+    .toast-notification {
+        position: fixed;
+        bottom: 100px;
+        left: 50%;
+        transform: translateX(-50%) translateY(100px);
+        background: rgba(28, 30, 33, 0.95);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 24px;
+        font-size: 14px;
+        font-weight: 500;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        z-index: 10000;
+        opacity: 0;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        pointer-events: none;
+    }
+    
+    .toast-notification.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    
+
+    
+    /* Upload Progress Bar */
+    .upload-progress {
+        position: fixed;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #ffffff;
+        padding: 16px 24px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        min-width: 300px;
+        z-index: 1000;
+        display: none;
+    }
+    
+    .upload-progress.active {
+        display: block;
+    }
+    
+    .progress-bar-container {
+        width: 100%;
+        height: 8px;
+        background: #e4e6eb;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 8px;
+    }
+    
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #1877f2, #42b0ff);
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+    
+    .progress-text {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #1c1e21;
+        font-size: 14px;
+        font-weight: 600;
     }
 </style>
 
@@ -139,84 +424,92 @@
             {% for message in messages %}
                 {% if message.content or message.file %}
                     <div style="margin-bottom: 16px; display: block; width: 100%;">
-                        <div data-message="{{ message.id }}" class="message-bubble {% if message.user == user %}message-own{% else %}message-other{% endif %}">
+                        <div data-message="{{ message.id }}" class="message-bubble {% if message.user == user %}message-own{% else %}message-other{% endif %}" style="background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%); color: white;">
                         
-                        <!-- Delete buttons (only for message owner or room admin) -->
-                        {% if message.user == user or room.created_by == user %}
-                            <div class="delete-btn" style="position: absolute; top: -12px; right: -12px; opacity: 0; transition: opacity 0.2s ease; display: flex; gap: 4px;">
-                                <!-- Delete all message -->
-                                <form method="post" action="{% url 'chat:delete_content' message.id 'all' %}" style="display: inline;" onsubmit="return confirm('Butun xabarni o\'chirishni xohlaysizmi?')">
+                        <!-- Action buttons -->
+                        <div class="message-actions">
+                            {% if message.content %}
+                                <!-- Copy button -->
+                                <button type="button" 
+                                        class="action-icon-btn copy-action" 
+                                        onclick="(function(btn){const el=document.getElementById('message-text-{{ message.id }}');if(!el)return;const text=el.innerText;const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');btn.innerHTML='✓';setTimeout(()=>btn.innerHTML='<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 24 24&quot;><path d=&quot;M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z&quot;/></svg>',1500)}catch(e){}document.body.removeChild(ta)})(this)"
+                                        title="Nusxa olish">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                        <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                                    </svg>
+                                </button>
+                            {% endif %}
+                            
+                            {% if message.file %}
+                                <!-- Download button -->
+                                <a href="{% url 'chat:download_file' message.id %}" class="action-icon-btn download-action" title="Yuklab olish" style="text-decoration: none;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                        <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                                    </svg>
+                                </a>
+                            {% endif %}
+                            
+                            {% if message.user == user or room.created_by == user %}
+                                {% if message.content %}
+                                    <!-- Edit button -->
+                                    <button type="button" 
+                                            class="action-icon-btn edit-action" 
+                                            data-message-id="{{ message.id }}"
+                                            title="Tahrirlash">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                        </svg>
+                                    </button>
+                                {% endif %}
+                                
+                                <!-- Delete button -->
+                                <form method="post" action="{% url 'chat:delete_content' message.id 'all' %}" style="display: inline; margin: 0;" onsubmit="return confirm('Xabarni o\'chirishni xohlaysizmi?')">
                                     {% csrf_token %}
-                                    <button type="submit" style="background: #ff4757; border: none; color: white; width: 24px; height: 24px; border-radius: 50%; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;" onmouseover="this.style.background='#ff3742'" onmouseout="this.style.background='#ff4757'" title="Butun xabarni o'chirish">
-                                        🗑️
+                                    <button type="submit" class="action-icon-btn delete-action" title="O'chirish">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                        </svg>
                                     </button>
                                 </form>
-                                
-                                {% if message.content and message.file %}
-                                    <!-- Delete only text -->
-                                    <form method="post" action="{% url 'chat:delete_content' message.id 'text' %}" style="display: inline;" onsubmit="return confirm('Faqat matnni o\'chirishni xohlaysizmi?')">
-                                        {% csrf_token %}
-                                        <button type="submit" style="background: #ffa726; border: none; color: white; width: 24px; height: 24px; border-radius: 50%; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;" onmouseover="this.style.background='#ff9800'" onmouseout="this.style.background='#ffa726'" title="Faqat matnni o'chirish">
-                                            📝
-                                        </button>
-                                    </form>
-                                    
-                                    <!-- Delete only file -->
-                                    <form method="post" action="{% url 'chat:delete_content' message.id 'file' %}" style="display: inline;" onsubmit="return confirm('Faqat faylni o\'chirishni xohlaysizmi?')">
-                                        {% csrf_token %}
-                                        <button type="submit" style="background: #42a5f5; border: none; color: white; width: 24px; height: 24px; border-radius: 50%; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;" onmouseover="this.style.background='#2196f3'" onmouseout="this.style.background='#42a5f5'" title="Faqat faylni o'chirish">
-                                            📎
-                                        </button>
-                                    </form>
-                                {% endif %}
-                            </div>
-                        {% endif %}
+                            {% endif %}
+                        </div>
                         
                         {% if message.user != user %}
-                            <div style="color: #67a3ff; font-size: 13px; font-weight: 500; margin-bottom: 4px;">
+                            <div style="color: #1877f2; font-size: 13px; font-weight: 600; margin-bottom: 4px;">
                                 {{ message.user.username }}
                             </div>
                         {% endif %}
                         
                         {% if message.content %}
-                            <div style="color: #ffffff; font-size: 15px; line-height: 1.4; word-wrap: break-word;">
-                                {{ message.content }}
-                            </div>
+                            <div class="message-content" id="message-text-{{ message.id }}" style="user-select: text; -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; white-space: pre-wrap; word-wrap: break-word;">{{ message.content }}</div>
                         {% endif %}
                         
                         {% if message.file %}
-                            <div style="margin-top: 8px; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                            <div style="margin-top: 8px; padding: 10px; background: transparent; border-radius: 12px;">
                                 <div style="display: flex; align-items: center; gap: 8px;">
-                                    <div style="font-size: 20px;">📎</div>
+                                    <div style="font-size: 24px;">📎</div>
                                     <div style="flex: 1;">
-                                        <div style="color: #ffffff; font-size: 14px; font-weight: 500;">
+                                        <div style="font-size: 14px; font-weight: 500; color: inherit;">
                                             {{ message.file.name|slice:"10:" }}
                                         </div>
-                                        <div style="color: #8b8b8b; font-size: 12px;">
+                                        <div style="color: #4caf50; font-size: 12px; font-weight: 500;">
                                             {{ message.get_file_size_display }}
                                         </div>
                                     </div>
-                                    <a href="{% url 'chat:download_file' message.id %}" 
-                                       style="background: rgba(76, 175, 80, 0.8); color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 500; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 4px;"
-                                       onmouseover="this.style.background='rgba(76, 175, 80, 1)'; this.style.transform='translateY(-1px)'"
-                                       onmouseout="this.style.background='rgba(76, 175, 80, 0.8)'; this.style.transform='translateY(0)'"
-                                       title="Xavfsiz yuklab olish">
-                                        📥 Yuklab olish
-                                    </a>
                                 </div>
                             </div>
                         {% endif %}
                         
-                        <div style="font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 4px; text-align: right;">
+                        <div style="font-size: 11px; color: rgba(0,0,0,0.5); margin-top: 6px; text-align: right;">
                             {{ message.timestamp|date:"H:i" }}
                         </div>
                         </div>
                     </div>
                 {% endif %}
             {% empty %}
-                <div style="text-align: center; color: #8b8b8b; padding: 40px; margin-top: 40px;">
-                    <div style="font-size: 48px; margin-bottom: 16px;">�</div>
-                    <h3 style="color: #ffffff; margin-bottom: 8px;">Hali xabar yo'q</h3>
+                <div style="text-align: center; color: #8a8d91; padding: 40px; margin-top: 40px;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">💬</div>
+                    <h3 style="color: #1c1e21; margin-bottom: 8px; font-weight: 600;">Hali xabar yo'q</h3>
                     <p>Birinchi xabarni yozing!</p>
                 </div>
             {% endfor %}
@@ -225,42 +518,259 @@
 
     <!-- Input area -->
     <div class="input-area">
-        <form method="post" enctype="multipart/form-data" class="input-form">
+        <!-- File Preview -->
+        <div id="filePreview" style="display: none; background: #f5f7fa; border-top: 1px solid #e4e6eb; padding: 12px 20px;">
+            <div style="display: flex; align-items: center; gap: 12px; background: white; padding: 10px 12px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <div style="font-size: 32px;">📎</div>
+                <div style="flex: 1; min-width: 0;">
+                    <div id="selectedFileName" style="font-weight: 500; color: #1c1e21; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
+                    <div id="selectedFileSize" style="font-size: 12px; color: #65676b; margin-top: 2px;"></div>
+                </div>
+                <button type="button" onclick="clearSelectedFile()" style="background: #f02849; color: white; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;" onmouseover="this.style.background='#d01d3f'" onmouseout="this.style.background='#f02849'" title="Bekor qilish">
+                    ✕
+                </button>
+            </div>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data" class="input-form" id="messageForm" onsubmit="return handleFormSubmitWrapper(event)">
             {% csrf_token %}
             <button type="button" class="attach-btn" onclick="document.getElementById('fileInput').click()" title="Fayl biriktirish">
-                📎
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+                </svg>
             </button>
             <input type="file" name="file" id="fileInput" 
-                   accept=".txt,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp,.svg,.mp3,.wav,.mp4,.avi,.mkv,.webm,.zip,.rar,.7z,.tar,.gz" 
                    style="display: none;" 
                    onchange="updateFileName(this)"
-                   title="Ruxsat etilgan fayllar: rasmlar, hujjatlar, audio/video, arxiv fayllar">
+                   title="Ixtiyoriy fayl yuklash mumkin (100MB gacha)">
             <textarea name="content" 
                       class="message-input" 
                       placeholder="Xabar yozing..." 
                       rows="1"
                       onkeypress="handleKeyPress(event)"
-                      oninput="autoResize(this)"></textarea>
+                      oninput="autoResize(this); handleTyping()"></textarea>
             <button type="submit" class="send-btn" title="Yuborish">
-                ✈️
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
             </button>
         </form>
     </div>
 
 </div>
 
+<!-- Upload Progress Indicator -->
+<div class="upload-progress" id="uploadProgress">
+    <div class="progress-text">
+        <span>📤 Fayl yuklanmoqda...</span>
+        <span id="uploadPercent">0%</span>
+    </div>
+    <div class="progress-bar-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div style="margin-top: 8px; color: #8a8d91; font-size: 12px; text-align: center;" id="uploadSize">
+        0 KB / 0 KB
+    </div>
+</div>
+
+<!-- Custom Prompt Dialog -->
+<div id="customPromptOverlay" class="custom-prompt-overlay">
+    <div class="custom-prompt-dialog">
+        <div class="custom-prompt-header">
+            <span style="font-size: 24px;">✏️</span>
+            <h3>Xabarni tahrirlash</h3>
+        </div>
+        <div class="custom-prompt-body">
+            <textarea id="customPromptInput" placeholder="Xabar matnini kiriting..." spellcheck="false"></textarea>
+        </div>
+        <div class="custom-prompt-footer">
+            <button class="custom-prompt-btn custom-prompt-btn-cancel" onclick="closeCustomPrompt()">Bekor qilish</button>
+            <button class="custom-prompt-btn custom-prompt-btn-ok" onclick="submitCustomPrompt()">Saqlash</button>
+        </div>
+    </div>
+</div>
+
 <script>
+    // WebSocket Connection
+    const roomId = {{ room.id }};
+    const wsScheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const wsUrl = wsScheme + '://' + window.location.host + '/ws/chat/' + roomId + '/';
+    
+    let chatSocket = null;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
+    
+    function connectWebSocket() {
+        chatSocket = new WebSocket(wsUrl);
+        
+        chatSocket.onopen = function(e) {
+            console.log('WebSocket ulanish muvaffaqiyatli');
+            reconnectAttempts = 0;
+            showNotification('Real-time ulanish o\'rnatildi', 'success');
+        };
+        
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            
+            if (data.type === 'chat_message') {
+                // Yangi xabarni qo'shish
+                addMessageToChat(data);
+                scrollToBottom();
+            } else if (data.type === 'user_join') {
+                showNotification(data.user + ' xonaga kirdi', 'info');
+            } else if (data.type === 'user_leave') {
+                showNotification(data.user + ' xonadan chiqdi', 'info');
+            } else if (data.type === 'user_typing') {
+                showTypingIndicator(data.user, data.is_typing);
+            } else if (data.type === 'message_deleted') {
+                handleMessageDeleted(data.message_id, data.delete_type);
+            }
+        };
+        
+        chatSocket.onclose = function(e) {
+            console.log('WebSocket ulanish uzildi');
+            
+            if (reconnectAttempts < maxReconnectAttempts) {
+                reconnectAttempts++;
+                const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
+                console.log(`${delay}ms dan keyin qayta ulanish...`);
+                setTimeout(connectWebSocket, delay);
+            } else {
+                showNotification('Ulanish uzildi. Sahifani yangilang', 'error');
+            }
+        };
+        
+        chatSocket.onerror = function(e) {
+            console.error('WebSocket xato:', e);
+        };
+    }
+    
+    // WebSocket orqali xabar yuborish
+    function sendWebSocketMessage(message) {
+        if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+            chatSocket.send(JSON.stringify({
+                'type': 'chat_message',
+                'message': message
+            }));
+            return true;
+        }
+        return false;
+    }
+    
+    // Yangi xabarni chat'ga qo'shish
+    function addMessageToChat(data) {
+        const messagesContainer = document.querySelector('#messagesContainer > div');
+        const currentUser = '{{ user.username }}';
+        const isOwn = data.user === currentUser;
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.style.marginBottom = '16px';
+        messageDiv.style.display = 'block';
+        messageDiv.style.width = '100%';
+        
+        const bubbleClass = isOwn ? 'message-own' : 'message-other';
+        const textColor = isOwn ? '#ffffff' : '#050505';
+        const timeColor = isOwn ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.5)';
+        
+        let messageHTML = `
+            <div data-message="${data.message_id}" class="message-bubble ${bubbleClass}">
+                ${!isOwn ? `<div style="color: #1877f2; font-size: 13px; font-weight: 600; margin-bottom: 4px;">${data.user}</div>` : ''}
+                <div class="message-content" id="message-text-${data.message_id}" style="color: ${textColor}; user-select: text;">
+                    ${escapeHtml(data.message)}
+                </div>
+                <div style="font-size: 11px; color: ${timeColor}; margin-top: 6px; text-align: right;">
+                    ${data.timestamp}
+                </div>
+            </div>
+        `;
+        
+        messageDiv.innerHTML = messageHTML;
+        messagesContainer.appendChild(messageDiv);
+        scrollToBottom();
+    }
+    
+    // Xabar o'chirilganini handle qilish
+    function handleMessageDeleted(messageId, deleteType) {
+        const messageElement = document.querySelector(`[data-message="${messageId}"]`);
+        if (messageElement) {
+            if (deleteType === 'all') {
+                messageElement.parentElement.remove();
+            } else {
+                // Sahifani qayta yuklash
+                location.reload();
+            }
+        }
+    }
+    
+    // Typing indicator
+    let typingTimeout;
+    function showTypingIndicator(user, isTyping) {
+        const typingDiv = document.getElementById('typingIndicator');
+        if (!typingDiv) {
+            const indicator = document.createElement('div');
+            indicator.id = 'typingIndicator';
+            indicator.style.cssText = 'position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 8px 16px; border-radius: 20px; font-size: 14px; z-index: 1000;';
+            document.body.appendChild(indicator);
+        }
+        
+        if (isTyping) {
+            document.getElementById('typingIndicator').textContent = user + ' yozmoqda...';
+            document.getElementById('typingIndicator').style.display = 'block';
+            
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                document.getElementById('typingIndicator').style.display = 'none';
+            }, 3000);
+        } else {
+            document.getElementById('typingIndicator').style.display = 'none';
+        }
+    }
+    
+    // Bildirishnoma ko'rsatish
+    function showNotification(message, type = 'info') {
+        // Kichik notification (optional - foydalanuvchi xohishiga qarab)
+        console.log(`[${type.toUpperCase()}] ${message}`);
+    }
+    
+    // HTML escape
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
     // Auto-scroll to bottom
     function scrollToBottom() {
         const container = document.getElementById('messagesContainer');
         container.scrollTop = container.scrollHeight;
     }
 
-    // Handle enter key
+    // Handle enter key - WebSocket yoki form submit
     function handleKeyPress(event) {
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
-            event.target.form.submit();
+            
+            const textarea = event.target;
+            const message = textarea.value.trim();
+            const fileInput = document.getElementById('fileInput');
+            
+            // Agar fayl biriktirilgan bo'lsa, form submit qil (HTTP POST)
+            if (fileInput.files.length > 0) {
+                event.target.form.submit();
+                return;
+            }
+            
+            // Agar faqat matn bo'lsa
+            if (message) {
+                // WebSocket ochiq bo'lsa, WebSocket orqali yuborish
+                if (chatSocket && chatSocket.readyState === WebSocket.OPEN && sendWebSocketMessage(message)) {
+                    textarea.value = '';
+                    autoResize(textarea);
+                } else {
+                    // WebSocket yo'q yoki ishlamasa, HTTP POST orqali yuborish
+                    event.target.form.submit();
+                }
+            }
         }
     }
 
@@ -269,51 +779,166 @@
         textarea.style.height = 'auto';
         textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
     }
+    
+    // Typing indicator yuborish
+    let typingSendTimeout;
+    function handleTyping() {
+        if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+            chatSocket.send(JSON.stringify({
+                'type': 'typing',
+                'is_typing': true
+            }));
+            
+            clearTimeout(typingSendTimeout);
+            typingSendTimeout = setTimeout(() => {
+                chatSocket.send(JSON.stringify({
+                    'type': 'typing',
+                    'is_typing': false
+                }));
+            }, 1000);
+        }
+    }
 
-    // Update file name with validation
+    // Update file name with validation and preview
     function updateFileName(input) {
-        const btn = document.querySelector('.attach-btn');
+        const filePreview = document.getElementById('filePreview');
+        const fileName = document.getElementById('selectedFileName');
+        const fileSize = document.getElementById('selectedFileSize');
         
         if (input.files.length > 0) {
             const file = input.files[0];
             
-            // Fayl hajmini tekshirish (50MB)
-            const maxSize = 50 * 1024 * 1024; // 50MB
+            // Fayl hajmini tekshirish (100MB)
+            const maxSize = 100 * 1024 * 1024; // 100MB
             if (file.size > maxSize) {
-                alert('Fayl hajmi 50MB dan katta bo\'lishi mumkin emas!');
+                alert('Fayl hajmi 100MB dan katta bo\'lishi mumkin emas!');
                 input.value = '';
-                btn.innerHTML = '📎';
-                btn.style.color = '#8b8b8b';
+                filePreview.style.display = 'none';
                 return;
             }
             
-            // Fayl kengaytmasini tekshirish
-            const allowedExtensions = [
-                '.txt', '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
-                '.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg',
-                '.mp3', '.wav', '.mp4', '.avi', '.mkv', '.webm',
-                '.zip', '.rar', '.7z', '.tar', '.gz'
-            ];
+            // Barcha fayl turlariga ruxsat - hech qanday cheklov yo'q
             
-            const fileExt = '.' + file.name.split('.').pop().toLowerCase();
-            if (!allowedExtensions.includes(fileExt)) {
-                alert('Fayl turi ruxsat etilmagan: ' + fileExt + '\n\nRuxsat etilgan turlar:\n• Hujjatlar: PDF, Word, Excel, PowerPoint\n• Rasmlar: JPG, PNG, GIF, WebP, SVG\n• Audio/Video: MP3, WAV, MP4, AVI, MKV, WebM\n• Arxivlar: ZIP, RAR, 7Z, TAR, GZ\n• Matnlar: TXT');
-                input.value = '';
-                btn.innerHTML = '📎';
-                btn.style.color = '#8b8b8b';
-                return;
-            }
-            
-            // Muvaffaqiyatli yuklandi
-            const fileName = file.name.length > 15 ? file.name.substring(0, 15) + '...' : file.name;
-            btn.innerHTML = '✅ ' + fileName;
-            btn.style.color = '#4caf50';
-            btn.title = 'Tanlangan fayl: ' + file.name + ' (' + formatFileSize(file.size) + ')';
+            // Preview ko'rsatish
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            filePreview.style.display = 'block';
         } else {
-            btn.innerHTML = '📎';
-            btn.style.color = '#8b8b8b';
-            btn.title = 'Fayl biriktirish';
+            filePreview.style.display = 'none';
         }
+    }
+    
+    // Clear selected file
+    function clearSelectedFile() {
+        const fileInput = document.getElementById('fileInput');
+        const filePreview = document.getElementById('filePreview');
+        fileInput.value = '';
+        filePreview.style.display = 'none';
+    }
+    
+    // Handle form submit with upload progress
+    function handleFormSubmit(event) {
+        const fileInput = document.getElementById('fileInput');
+        
+        // Agar fayl biriktirilgan bo'lsa, AJAX orqali yuborish
+        if (fileInput.files.length > 0) {
+            event.preventDefault();
+            uploadFileWithProgress();
+            return false;
+        }
+        
+        // Faqat matn bo'lsa, oddiy submit
+        return true;
+    }
+    
+    // Wrapper function for form submit
+    function handleFormSubmitWrapper(event) {
+        const textarea = document.querySelector('.message-input');
+        const message = textarea.value.trim();
+        const fileInput = document.getElementById('fileInput');
+        
+        // Agar fayl biriktirilgan bo'lsa, handleFormSubmit orqali yuborish
+        if (fileInput.files.length > 0) {
+            return handleFormSubmit(event);
+        }
+        
+        // Agar faqat matn bo'lsa
+        if (message) {
+            // WebSocket ochiq bo'lsa va matn yuborish muvaffaqiyatli bo'lsa
+            if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+                event.preventDefault();
+                if (sendWebSocketMessage(message)) {
+                    textarea.value = '';
+                    autoResize(textarea);
+                    clearSelectedFile(); // File preview tozalash
+                }
+                return false;
+            }
+            // WebSocket yo'q bo'lsa, oddiy HTTP POST
+            clearSelectedFile(); // File preview tozalash
+            return true;
+        }
+        
+        // Bo'sh xabar - yuborishni oldini olish
+        event.preventDefault();
+        return false;
+    }
+    
+    // Upload file with progress tracking
+    function uploadFileWithProgress() {
+        const form = document.getElementById('messageForm');
+        const formData = new FormData(form);
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+        
+        const progressDiv = document.getElementById('uploadProgress');
+        const progressBar = document.getElementById('progressBar');
+        const uploadPercent = document.getElementById('uploadPercent');
+        const uploadSize = document.getElementById('uploadSize');
+        
+        // Progress ko'rsatish
+        progressDiv.classList.add('active');
+        
+        const xhr = new XMLHttpRequest();
+        
+        // Progress event
+        xhr.upload.addEventListener('progress', function(e) {
+            if (e.lengthComputable) {
+                const percentComplete = (e.loaded / e.total) * 100;
+                const loadedKB = (e.loaded / 1024).toFixed(2);
+                const totalKB = (e.total / 1024).toFixed(2);
+                
+                progressBar.style.width = percentComplete + '%';
+                uploadPercent.textContent = percentComplete.toFixed(0) + '%';
+                uploadSize.textContent = loadedKB + ' KB / ' + totalKB + ' KB';
+            }
+        });
+        
+        // Load event (complete)
+        xhr.addEventListener('load', function() {
+            if (xhr.status === 200) {
+                // Success
+                clearSelectedFile(); // File preview tozalash
+                setTimeout(() => {
+                    progressDiv.classList.remove('active');
+                    progressBar.style.width = '0%';
+                    location.reload(); // Sahifani yangilash
+                }, 500);
+            } else {
+                alert('Xatolik yuz berdi: ' + xhr.statusText);
+                progressDiv.classList.remove('active');
+            }
+        });
+        
+        // Error event
+        xhr.addEventListener('error', function() {
+            alert('Yuklashda xatolik yuz berdi');
+            progressDiv.classList.remove('active');
+        });
+        
+        // Send request
+        xhr.open('POST', window.location.href, true);
+        xhr.send(formData);
     }
     
     // Fayl hajmini formatlar
@@ -324,22 +949,231 @@
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
+    
+    // Copy message text to clipboard
+    function copyMessageText(messageId) {
+        const messageElement = document.getElementById('message-text-' + messageId);
+        
+        if (!messageElement) {
+            showToast('❌ Xabar topilmadi');
+            return;
+        }
+        
+        const textToCopy = messageElement.innerText || messageElement.textContent;
+        
+        // Try modern clipboard API first
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showToast('✅ Matn nusxalandi!');
+            }).catch(() => {
+                // Fallback to execCommand
+                copyUsingExecCommand(textToCopy);
+            });
+        } else {
+            // Fallback for older browsers
+            copyUsingExecCommand(textToCopy);
+        }
+    }
+    
+    // Fallback copy method
+    function copyUsingExecCommand(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        
+        try {
+            const successful = document.execCommand('copy');
+            if (successful) {
+                showToast('✅ Matn nusxalandi!');
+            } else {
+                showToast('❌ Nusxalash amalga oshmadi');
+            }
+        } catch (err) {
+            showToast('❌ Xatolik: ' + err.message);
+        }
+        
+        document.body.removeChild(textarea);
+    }
+
+    // Show copy success feedback
+    function showCopySuccess(button) {
+        if (!button) return;
+        
+        console.log('Showing copy success feedback');
+        
+        // Save original content
+        const originalHTML = button.innerHTML;
+        const originalBg = button.style.backgroundColor;
+        const originalColor = button.style.color;
+        
+        // Change to success state
+        button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: currentColor;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>';
+        button.style.backgroundColor = '#4caf50';
+        button.style.color = 'white';
+        button.style.borderColor = '#4caf50';
+        
+        // Show toast
+        showToast('✅ Matn nusxalandi!');
+        
+        // Restore after 1.5 seconds
+        setTimeout(() => {
+            button.innerHTML = originalHTML;
+            button.style.backgroundColor = originalBg;
+            button.style.color = originalColor;
+            button.style.borderColor = '';
+        }, 1500);
+    }
+    
+    // Show toast notification
+    function showToast(message) {
+        // Check if toast already exists
+        let toast = document.getElementById('copyToast');
+        
+        if (!toast) {
+            // Create toast element
+            toast = document.createElement('div');
+            toast.id = 'copyToast';
+            toast.className = 'toast-notification';
+            document.body.appendChild(toast);
+        }
+        
+        // Set message and show
+        toast.textContent = message;
+        
+        // Force reflow to restart animation
+        toast.offsetHeight;
+        
+        toast.classList.add('show');
+        
+        // Hide after 2 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 2000);
+    }
+
+    // Custom Prompt Dialog
+    let promptCallback = null;
+
+    function showCustomPrompt(title, defaultValue, callback) {
+        const overlay = document.getElementById('customPromptOverlay');
+        const input = document.getElementById('customPromptInput');
+        
+        if (!overlay || !input) {
+            console.error('Prompt elements not found');
+            return;
+        }
+        
+        input.value = defaultValue || '';
+        overlay.style.display = 'block';
+        promptCallback = callback;
+        
+        // Enable input
+        input.disabled = false;
+        input.readOnly = false;
+        
+        // Focus and select
+        setTimeout(() => {
+            input.focus();
+            input.click();
+            input.setSelectionRange(input.value.length, input.value.length);
+        }, 150);
+    }
+
+    function closeCustomPrompt() {
+        document.getElementById('customPromptOverlay').style.display = 'none';
+        promptCallback = null;
+    }
+
+    function submitCustomPrompt() {
+        const input = document.getElementById('customPromptInput');
+        const value = input.value.trim();
+        
+        if (promptCallback) {
+            promptCallback(value);
+        }
+        
+        closeCustomPrompt();
+    }
+
+    // Close on Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeCustomPrompt();
+        }
+    });
+
+    // Close on overlay click
+    document.getElementById('customPromptOverlay')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeCustomPrompt();
+        }
+    });
+
+    // Edit message function
+    function openEditModal(messageId) {
+        const messageElement = document.getElementById('message-text-' + messageId);
+        
+        if (!messageElement) {
+            console.error('Message element not found');
+            return;
+        }
+        
+        const currentText = messageElement.innerText || messageElement.textContent;
+        
+        showCustomPrompt('Xabarni tahrirlash', currentText, function(newText) {
+            if (newText && newText !== currentText) {
+                // Create form and submit
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '{% url "chat:room" room.id %}';
+                
+                const csrf = document.createElement('input');
+                csrf.type = 'hidden';
+                csrf.name = 'csrfmiddlewaretoken';
+                csrf.value = '{{ csrf_token }}';
+                
+                const msgId = document.createElement('input');
+                msgId.type = 'hidden';
+                msgId.name = 'edit_message_id';
+                msgId.value = messageId;
+                
+                const content = document.createElement('input');
+                content.type = 'hidden';
+                content.name = 'edited_content';
+                content.value = newText;
+                
+                form.appendChild(csrf);
+                form.appendChild(msgId);
+                form.appendChild(content);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    }
 
     // Initialize
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('Page loaded, initializing...');
+        
         scrollToBottom();
         
-        // Add hover effect for delete buttons
-        const messageContainers = document.querySelectorAll('[data-message]');
-        messageContainers.forEach(container => {
-            const deleteBtn = container.querySelector('.delete-btn');
-            if (deleteBtn) {
-                container.addEventListener('mouseenter', () => {
-                    deleteBtn.style.opacity = '1';
-                });
-                container.addEventListener('mouseleave', () => {
-                    deleteBtn.style.opacity = '0';
-                });
+        // WebSocket ni ishga tushirish
+        connectWebSocket();
+        
+        // Edit button event listeners
+        document.addEventListener('click', function(e) {
+            const editBtn = e.target.closest('.edit-action');
+            if (editBtn) {
+                e.preventDefault();
+                const messageId = editBtn.getAttribute('data-message-id');
+                if (messageId) {
+                    console.log('Edit clicked for message:', messageId);
+                    openEditModal(messageId);
+                }
             }
         });
     });

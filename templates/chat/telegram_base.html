@@ -16,8 +16,8 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #0f0f23;
-            color: #ffffff;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #1c1e21;
             height: 100vh;
             overflow: hidden;
         }
@@ -29,44 +29,48 @@
             top: 0;
             width: 420px;
             height: 100vh;
-            background: #212121;
-            border-right: 1px solid #2f2f2f;
+            background: #ffffff;
+            border-right: 1px solid #e4e6eb;
             display: flex;
             flex-direction: column;
             z-index: 100;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.1);
         }
 
         .sidebar-header {
             padding: 20px;
-            background: #1e1e1e;
-            border-bottom: 1px solid #2f2f2f;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-bottom: none;
+            color: white;
         }
 
         .sidebar-header h2 {
             color: #ffffff;
             font-size: 20px;
-            font-weight: 500;
+            font-weight: 600;
             margin-bottom: 8px;
         }
 
         .search-box {
             width: 100%;
             padding: 12px 16px;
-            background: #2f2f2f;
-            border: none;
+            background: #f5f7fa;
+            border: 1px solid #dfe1e6;
             border-radius: 12px;
-            color: #ffffff;
+            color: #1c1e21;
             font-size: 14px;
             margin-top: 12px;
         }
 
         .search-box::placeholder {
-            color: #8b8b8b;
+            color: #65676b;
         }
 
         .search-box:focus {
             outline: none;
-            background: #383838;
+            background: #ffffff;
+            border-color: #1877f2;
+            box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.1);
         }
 
         /* User info */
@@ -81,23 +85,24 @@
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: 600;
             font-size: 18px;
+            box-shadow: 0 4px 12px rgba(240, 147, 251, 0.4);
         }
 
         .user-details h3 {
             color: #ffffff;
             font-size: 16px;
-            font-weight: 500;
+            font-weight: 600;
         }
 
         .user-details p {
-            color: #8b8b8b;
+            color: #8a8d91;
             font-size: 14px;
         }
 
@@ -112,15 +117,16 @@
             padding: 12px 20px;
             cursor: pointer;
             transition: background 0.15s ease;
-            border-bottom: 1px solid #2a2a2a;
+            border-bottom: 1px solid #f5f7fa;
         }
 
         .chat-item:hover {
-            background: #2a2a2a;
+            background: #f5f7fa;
         }
 
         .chat-item.active {
-            background: #2563eb;
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-left: 3px solid #667eea;
         }
 
         .chat-header {
@@ -131,18 +137,18 @@
         }
 
         .chat-name {
-            color: #ffffff;
+            color: #1c1e21;
             font-size: 16px;
-            font-weight: 500;
+            font-weight: 600;
         }
 
         .chat-time {
-            color: #8b8b8b;
+            color: #8a8d91;
             font-size: 13px;
         }
 
         .chat-preview {
-            color: #8b8b8b;
+            color: #8a8d91;
             font-size: 14px;
             white-space: nowrap;
             overflow: hidden;
@@ -155,24 +161,25 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-            background: #17212b;
+            background: linear-gradient(180deg, #ffffff 0%, #f8f9ff 100%);
         }
 
         /* Chat header */
         .chat-header-main {
             padding: 16px 24px;
-            background: #212121;
-            border-bottom: 1px solid #2f2f2f;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-bottom: none;
             display: flex;
             align-items: center;
             gap: 16px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
 
         .back-btn {
             display: none;
             background: none;
             border: none;
-            color: #8b8b8b;
+            color: #65676b;
             font-size: 20px;
             cursor: pointer;
             padding: 8px;
@@ -181,17 +188,17 @@
         }
 
         .back-btn:hover {
-            background: #2f2f2f;
+            background: #f0f2f5;
         }
 
         .chat-info h3 {
             color: #ffffff;
             font-size: 18px;
-            font-weight: 500;
+            font-weight: 600;
         }
 
         .chat-info p {
-            color: #8b8b8b;
+            color: #8a8d91;
             font-size: 14px;
         }
 
@@ -200,39 +207,42 @@
             flex: 1;
             overflow-y: auto;
             padding: 0;
-            background: #17212b;
+            background: #f5f7fa;
         }
 
         /* Input area */
         .input-area {
             padding: 16px 24px;
-            background: #212121;
-            border-top: 1px solid #2f2f2f;
+            background: #ffffff;
+            border-top: 1px solid #e4e6eb;
         }
 
         .input-form {
             display: flex;
             align-items: end;
             gap: 12px;
-            background: #2f2f2f;
+            background: #f5f7fa;
             border-radius: 24px;
             padding: 8px;
+            border: 1px solid #dfe1e6;
         }
 
         .message-input {
             flex: 1;
             border: none;
             background: transparent;
-            color: #ffffff;
+            color: #1c1e21;
             padding: 12px 16px;
             font-size: 15px;
             resize: none;
             max-height: 120px;
             min-height: 20px;
+            line-height: 1.5;
+            white-space: pre-wrap;
         }
 
         .message-input::placeholder {
-            color: #8b8b8b;
+            color: #8a8d91;
         }
 
         .message-input:focus {
@@ -242,27 +252,37 @@
         .attach-btn, .send-btn {
             background: none;
             border: none;
-            color: #8b8b8b;
-            font-size: 20px;
             cursor: pointer;
-            padding: 12px;
+            padding: 10px;
             border-radius: 50%;
-            transition: all 0.15s ease;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+        }
+
+        .attach-btn {
+            color: #8a8d91;
         }
 
         .attach-btn:hover {
-            background: #383838;
-            color: #ffffff;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            color: #667eea;
+            transform: rotate(15deg);
         }
 
         .send-btn {
-            background: #2563eb;
+            background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
             color: #ffffff;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
         }
 
         .send-btn:hover {
-            background: #1d4ed8;
-            transform: scale(1.05);
+            background: linear-gradient(135deg, #45a049 0%, #5db560 100%);
+            transform: scale(1.08) rotate(-5deg);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
         }
 
         /* Welcome screen */
@@ -273,7 +293,7 @@
             justify-content: center;
             height: 100%;
             text-align: center;
-            color: #8b8b8b;
+            color: #65676b;
         }
 
         .welcome-screen .icon {
@@ -283,9 +303,9 @@
 
         .welcome-screen h2 {
             font-size: 24px;
-            font-weight: 500;
+            font-weight: 600;
             margin-bottom: 12px;
-            color: #ffffff;
+            color: #1c1e21;
         }
 
         .welcome-screen p {
@@ -332,12 +352,12 @@
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #3f3f3f;
+            background: #dadde1;
             border-radius: 3px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: #4f4f4f;
+            background: #c4c7cc;
         }
     </style>
 </head>

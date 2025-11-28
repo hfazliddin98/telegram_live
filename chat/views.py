@@ -68,6 +68,21 @@ def room(request, room_id):
         RoomMember.objects.create(room=room, user=request.user)
     
     if request.method == 'POST':
+        # Xabarni tahrirlash
+        edit_message_id = request.POST.get('edit_message_id')
+        if edit_message_id:
+            message = get_object_or_404(Message, id=edit_message_id, room=room)
+            # Faqat xabar egasi yoki admin tahrirlashi mumkin
+            if request.user == message.user or request.user == room.created_by:
+                edited_content = request.POST.get('edited_content', '')
+                # Strip faqat boshi va oxiridan, line breaks ichida saqlanadi
+                edited_content = edited_content.strip()
+                if edited_content:
+                    message.content = edited_content
+                    message.save()
+            return redirect('chat:room', room_id=room_id)
+        
+        # Yangi xabar yaratish
         content = request.POST.get('content', '').strip()
         file = request.FILES.get('file')
         
@@ -77,22 +92,13 @@ def room(request, room_id):
                 import os
                 import mimetypes
                 
-                # Fayl hajmini tekshirish (50MB limit)
-                max_size = 50 * 1024 * 1024  # 50MB
+                # Fayl hajmini tekshirish (100MB limit)
+                max_size = 100 * 1024 * 1024  # 100MB
                 if file.size > max_size:
-                    return HttpResponse("Fayl hajmi 50MB dan katta bo'lishi mumkin emas", status=400)
+                    return HttpResponse("Fayl hajmi 100MB dan katta bo'lishi mumkin emas", status=400)
                 
-                # Fayl kengaytmasini tekshirish
-                allowed_extensions = [
-                    '.txt', '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
-                    '.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg',
-                    '.mp3', '.wav', '.mp4', '.avi', '.mkv', '.webm',
-                    '.zip', '.rar', '.7z', '.tar', '.gz'
-                ]
-                
-                file_ext = os.path.splitext(file.name)[1].lower()
-                if file_ext not in allowed_extensions:
-                    return HttpResponse(f"Fayl turi ruxsat etilmagan: {file_ext}", status=400)
+                # Barcha fayl turlariga ruxsat (hech qanday cheklov yo'q)
+                # Faqat fayl hajmi tekshiriladi
                 
                 # MIME type tekshirish
                 content_type, _ = mimetypes.guess_type(file.name)
